@@ -1,0 +1,138 @@
+Input:
+void f (int *arr, int *val) {
+    int j = 25;
+    for(int i = 0; i < j; ++i) {
+        arr[i] = arr[i-j]*val[i+2];
+    }
+}
+
+Command run: clang -O2 -emit-llvm
+Output (vectorized):
+define dso_local void @f(int*, int*)(ptr nocapture noundef %0, ptr nocapture noundef readonly %1) local_unnamed_addr #0 !dbg !10 {
+    #dbg_value(ptr %0, !17, !DIExpression(), !22)
+    #dbg_value(ptr %1, !18, !DIExpression(), !22)
+    #dbg_value(i32 25, !19, !DIExpression(), !22)
+    #dbg_value(i32 0, !20, !DIExpression(), !23)
+  %3 = getelementptr inbounds i8, ptr %1, i64 8, !dbg !24
+  %4 = getelementptr i8, ptr %0, i64 -100, !dbg !25
+  %5 = getelementptr i8, ptr %0, i64 100, !dbg !25
+  %6 = getelementptr i8, ptr %1, i64 108, !dbg !25
+  %7 = icmp uge ptr %4, %6, !dbg !25
+  %8 = icmp uge ptr %3, %5, !dbg !25
+  %9 = or i1 %7, %8, !dbg !25
+  br i1 %9, label %25, label %10, !dbg !25
+
+10:
+  %11 = phi i64 [ 0, %2 ], [ 24, %25 ]
+  br label %12, !dbg !25
+
+12:
+  %13 = phi i64 [ %21, %12 ], [ %11, %10 ]
+  %14 = phi i64 [ %22, %12 ], [ 0, %10 ]
+    #dbg_value(i64 %13, !20, !DIExpression(), !23)
+  %15 = getelementptr i32, ptr %0, i64 %13, !dbg !26
+  %16 = getelementptr i8, ptr %15, i64 -100, !dbg !26
+  %17 = load i32, ptr %16, align 4, !dbg !26
+  %18 = getelementptr inbounds i32, ptr %3, i64 %13, !dbg !33
+  %19 = load i32, ptr %18, align 4, !dbg !33
+  %20 = mul nsw i32 %19, %17, !dbg !34
+  store i32 %20, ptr %15, align 4, !dbg !35
+  %21 = add nuw nsw i64 %13, 1, !dbg !36
+    #dbg_value(i64 %21, !20, !DIExpression(), !23)
+  %22 = add i64 %14, 1, !dbg !25
+  %23 = icmp eq i64 %14, 0, !dbg !25
+  br i1 %23, label %24, label %12, !dbg !25
+
+24:
+  br i1 %9, label %60, label %61, !dbg !25
+
+25:
+  %26 = getelementptr i8, ptr %0, i64 -100, !dbg !26
+  %27 = getelementptr i8, ptr %0, i64 -84, !dbg !26
+  %28 = load <4 x i32>, ptr %26, align 4, !dbg !26
+  %29 = load <4 x i32>, ptr %27, align 4, !dbg !26
+  %30 = getelementptr inbounds i8, ptr %1, i64 24, !dbg !33
+  %31 = load <4 x i32>, ptr %3, align 4, !dbg !33
+  %32 = load <4 x i32>, ptr %30, align 4, !dbg !33
+  %33 = mul nsw <4 x i32> %31, %28, !dbg !34
+  %34 = mul nsw <4 x i32> %32, %29, !dbg !34
+  %35 = getelementptr i8, ptr %0, i64 16, !dbg !35
+  store <4 x i32> %33, ptr %0, align 4, !dbg !35
+  store <4 x i32> %34, ptr %35, align 4, !dbg !35
+  %36 = getelementptr i8, ptr %0, i64 32, !dbg !26
+  %37 = getelementptr i8, ptr %0, i64 -68, !dbg !26
+  %38 = getelementptr i8, ptr %0, i64 -52, !dbg !26
+  %39 = load <4 x i32>, ptr %37, align 4, !dbg !26
+  %40 = load <4 x i32>, ptr %38, align 4, !dbg !26
+  %41 = getelementptr inbounds i8, ptr %1, i64 40, !dbg !33
+  %42 = getelementptr inbounds i8, ptr %1, i64 56, !dbg !33
+  %43 = load <4 x i32>, ptr %41, align 4, !dbg !33
+  %44 = load <4 x i32>, ptr %42, align 4, !dbg !33
+  %45 = mul nsw <4 x i32> %43, %39, !dbg !34
+  %46 = mul nsw <4 x i32> %44, %40, !dbg !34
+  %47 = getelementptr i8, ptr %0, i64 48, !dbg !35
+  store <4 x i32> %45, ptr %36, align 4, !dbg !35
+  store <4 x i32> %46, ptr %47, align 4, !dbg !35
+  %48 = getelementptr i8, ptr %0, i64 64, !dbg !26
+  %49 = getelementptr i8, ptr %0, i64 -36, !dbg !26
+  %50 = getelementptr i8, ptr %0, i64 -20, !dbg !26
+  %51 = load <4 x i32>, ptr %49, align 4, !dbg !26
+  %52 = load <4 x i32>, ptr %50, align 4, !dbg !26
+  %53 = getelementptr inbounds i8, ptr %1, i64 72, !dbg !33
+  %54 = getelementptr inbounds i8, ptr %1, i64 88, !dbg !33
+  %55 = load <4 x i32>, ptr %53, align 4, !dbg !33
+  %56 = load <4 x i32>, ptr %54, align 4, !dbg !33
+  %57 = mul nsw <4 x i32> %55, %51, !dbg !34
+  %58 = mul nsw <4 x i32> %56, %52, !dbg !34
+  %59 = getelementptr i8, ptr %0, i64 80, !dbg !35
+  store <4 x i32> %57, ptr %48, align 4, !dbg !35
+  store <4 x i32> %58, ptr %59, align 4, !dbg !35
+  br label %10, !dbg !25
+
+60:
+  ret void, !dbg !44
+
+61:
+  %62 = phi i64 [ %90, %61 ], [ %21, %24 ]
+    #dbg_value(i64 %62, !20, !DIExpression(), !23)
+  %63 = getelementptr i32, ptr %0, i64 %62, !dbg !26
+  %64 = getelementptr i8, ptr %63, i64 -100, !dbg !26
+  %65 = load i32, ptr %64, align 4, !dbg !26
+  %66 = getelementptr inbounds i32, ptr %3, i64 %62, !dbg !33
+  %67 = load i32, ptr %66, align 4, !dbg !33
+  %68 = mul nsw i32 %67, %65, !dbg !34
+  store i32 %68, ptr %63, align 4, !dbg !35
+  %69 = add nuw nsw i64 %62, 1, !dbg !36
+    #dbg_value(i64 %69, !20, !DIExpression(), !23)
+  %70 = getelementptr i32, ptr %0, i64 %69, !dbg !26
+  %71 = getelementptr i8, ptr %70, i64 -100, !dbg !26
+  %72 = load i32, ptr %71, align 4, !dbg !26
+  %73 = getelementptr inbounds i32, ptr %3, i64 %69, !dbg !33
+  %74 = load i32, ptr %73, align 4, !dbg !33
+  %75 = mul nsw i32 %74, %72, !dbg !34
+  store i32 %75, ptr %70, align 4, !dbg !35
+  %76 = add nuw nsw i64 %62, 2, !dbg !36
+    #dbg_value(i64 %76, !20, !DIExpression(), !23)
+  %77 = getelementptr i32, ptr %0, i64 %76, !dbg !26
+  %78 = getelementptr i8, ptr %77, i64 -100, !dbg !26
+  %79 = load i32, ptr %78, align 4, !dbg !26
+  %80 = getelementptr inbounds i32, ptr %3, i64 %76, !dbg !33
+  %81 = load i32, ptr %80, align 4, !dbg !33
+  %82 = mul nsw i32 %81, %79, !dbg !34
+  store i32 %82, ptr %77, align 4, !dbg !35
+  %83 = add nuw nsw i64 %62, 3, !dbg !36
+    #dbg_value(i64 %83, !20, !DIExpression(), !23)
+  %84 = getelementptr i32, ptr %0, i64 %83, !dbg !26
+  %85 = getelementptr i8, ptr %84, i64 -100, !dbg !26
+  %86 = load i32, ptr %85, align 4, !dbg !26
+  %87 = getelementptr inbounds i32, ptr %3, i64 %83, !dbg !33
+  %88 = load i32, ptr %87, align 4, !dbg !33
+  %89 = mul nsw i32 %88, %86, !dbg !34
+  store i32 %89, ptr %84, align 4, !dbg !35
+  %90 = add nuw nsw i64 %62, 4, !dbg !36
+    #dbg_value(i64 %90, !20, !DIExpression(), !23)
+  %91 = icmp eq i64 %90, 25, !dbg !45
+  br i1 %91, label %60, label %61, !dbg !25
+}
+
+attributes #0 = { mustprogress nofree norecurse nosync nounwind memory(argmem: readwrite) uwtable "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
