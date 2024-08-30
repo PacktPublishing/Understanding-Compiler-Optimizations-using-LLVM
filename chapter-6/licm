@@ -1,0 +1,46 @@
+Input:
+define void @foo(i32 %x) {
+entry:
+    ret void
+}
+
+define i32 @bar(i32 %x) {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i.next, %loop ]
+  %y = mul i32 %x, 2
+  %y.next = add i32 %y, %i
+  call void @foo(i32 %y.next)
+  %i.next = add i32 %i, 1
+  %cond = icmp slt i32 %i.next, 10
+  br i1 %cond, label %loop, label %exit
+
+exit:
+  ret i32 0
+}
+
+command : opt --passes=licm example.ll
+Output:
+define void @foo(i32 %x) {
+entry:
+  ret void
+}
+
+define i32 @bar(i32 %x) {
+entry:
+  %y = mul i32 %x, 2
+  br label %loop
+
+loop:                                             ; preds = %loop, %entry
+  %i = phi i32 [ 0, %entry ], [ %i.next, %loop ]
+  %y.next = add i32 %y, %i
+  call void @foo(i32 %y.next)
+  %i.next = add i32 %i, 1
+  %cond = icmp slt i32 %i.next, 10
+  br i1 %cond, label %loop, label %exit
+
+exit:                                             ; preds = %loop
+  ret i32 0
+}
